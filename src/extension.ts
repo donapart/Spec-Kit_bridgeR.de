@@ -7,6 +7,7 @@ import { SettingsWebviewProvider } from './gui/SettingsWebviewProvider';
 import { StatusBarProvider } from './gui/StatusBarProvider';
 import { CommandCenterWebview } from './gui/CommandCenterWebview';
 import { registerPromptExplorer } from './gui/PromptExplorerProvider';
+import { registerPromptExplorerSearchView } from './gui/PromptExplorerSearchView';
 
 let chatHandler: ChatParticipantHandler | undefined;
 let documentationView: DocumentationView | undefined;
@@ -91,8 +92,9 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    // Prompt Explorer registrieren
-    registerPromptExplorer(context);
+    // Prompt Explorer registrieren + Suchleiste darüber (WebviewView)
+    const explorerProvider = registerPromptExplorer(context);
+    registerPromptExplorerSearchView(context, explorerProvider);
 
     console.log('Spec-Kit BridgeR.DE erfolgreich aktiviert!');
 }

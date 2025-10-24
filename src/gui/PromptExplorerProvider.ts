@@ -158,7 +158,7 @@ export class PromptExplorerProvider implements vscode.TreeDataProvider<AgentTree
   }
 }
 
-export function registerPromptExplorer(context: vscode.ExtensionContext): void {
+export function registerPromptExplorer(context: vscode.ExtensionContext): PromptExplorerProvider {
   const provider = new PromptExplorerProvider(context);
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider('specKitPromptExplorer', provider),
@@ -218,6 +218,7 @@ export function registerPromptExplorer(context: vscode.ExtensionContext): void {
       vscode.window.showInformationMessage(`Prompt-Korpus: ${res.files} Dateien, ${res.prompts} Prompts erkannt.`);
     })
   );
+  return provider;
 }
 
 async function openPromptMapWebview(context: vscode.ExtensionContext): Promise<void> {

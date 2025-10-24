@@ -38,6 +38,11 @@
     "views": {
       "specKitContainer": [
         {
+          "id": "specKitPromptExplorerSearch",
+          "name": "Prompt Suche",
+          "icon": "media/icon.svg"
+        },
+        {
           "id": "specKitPromptExplorer",
           "name": "Prompt Explorer",
           "icon": "media/icon.svg"

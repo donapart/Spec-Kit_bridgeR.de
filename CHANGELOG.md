@@ -8,10 +8,51 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 ## [Unreleased]
 
 ### Geplant
+
 - Sidebar Panel für Übersetzungs-Historie
 - Welcome Screen mit Onboarding
 - Context Memory für Gesprächsverlauf
 - Custom Prompts (Nutzer-definierbar)
+
+## [0.2.1] - 2025-10-24
+
+### Added
+
+- 🧠 Agents: Favoriten-Unterstützung
+  - Stern-Button pro Agent, Filter „Nur Favoriten“
+  - Export/Import von Agents inkl. Favoriten (JSON)
+  - „→ Chat“ Schnellaktion (Chat öffnen + Prompt kopieren)
+
+### Changed
+
+- Webview-Messaging: `setAgents` akzeptiert jetzt `{ agents, favorites }`
+- UI-Verbesserungen im Agents-Tab, inkl. TTS-Steuerung oben
+
+### Fixed
+
+- Lint-Korrekturen in Webview-Code (Klammern, optionale Verkettung, JSON-Filter-Key)
+- Serialisierung der Favoriten (Array statt Set für postMessage)
+
+## [0.2.0] - 2025-10-24
+
+### Added
+
+- 🚀 Deutsches Command Center (Webview) mit Tabs:
+  - Commands, Workflows, Snippets, Templates, Lernen, Agents
+- 🧠 Agents Tab (Agent Prompt Library):
+  - Dynamisches Laden aus `docs/system_prompts_leaks-main` (Markdown/TXT)
+  - Suche, Kategorie-Filter, Aktionen: In Chat kopieren, In Editor einfügen
+  - 🔊 TTS pro Agent (de-DE)
+- 📚 Dokumentations-Viewer mit TTS-Modus (de-DE)
+
+### Changed
+
+- Google Translation Provider: Lazy-Load des SDKs (stabile Aktivierung)
+- Typisierte Webview-Nachrichten und robustere Fehlerbehandlung
+
+### Fixed
+
+- Aktivierungsfehler („command not found“) durch onCommand-Events und Lazy-Import beseitigt
 
 ## [0.1.1] - 2025-10-24
 
@@ -138,4 +179,6 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - `Security` - Security-Fixes
 
 [Unreleased]: https://github.com/spec-kit/bridger-de/compare/v0.1.0...HEAD
+[0.2.1]: https://github.com/spec-kit/bridger-de/releases/tag/v0.2.1
+[0.2.0]: https://github.com/spec-kit/bridger-de/releases/tag/v0.2.0
 [0.1.0]: https://github.com/spec-kit/bridger-de/releases/tag/v0.1.0

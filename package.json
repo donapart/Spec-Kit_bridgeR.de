@@ -2,7 +2,7 @@
   "name": "spec-kit-bridger-de",
   "displayName": "Spec-Kit BridgeR.DE",
   "description": "Deutsche Übersetzungs-Bridge für spec-kit GitHub Copilot Chat",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "publisher": "spec-kit",
   "engines": {
     "vscode": "^1.85.0"
@@ -22,15 +22,28 @@
     "documentation"
   ],
   "activationEvents": [
-    "onLanguage:*",
-    "onCommand:spec-kit-bridger.openCommandCenter",
-    "onCommand:spec-kit-bridger.openSettings",
-    "onCommand:spec-kit-bridger.showDocs",
-    "onCommand:spec-kit-bridger.switchMode",
-    "onCommand:spec-kit-bridger.clearCache"
+    "onLanguage:*"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "specKitContainer",
+          "title": "Spec‑Kit",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "specKitContainer": [
+        {
+          "id": "specKitPromptExplorer",
+          "name": "Prompt Explorer",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
     "chatParticipants": [
       {
         "id": "spec-kit-bridger.de",
@@ -88,8 +101,32 @@
       {
         "command": "spec-kit-bridger.clearCache",
         "title": "Spec-Kit: Übersetzungs-Cache leeren"
-      }
+      },
+      { "command": "spec-kit-bridger.prompts.refresh", "title": "Spec‑Kit: Prompt Explorer aktualisieren" },
+      { "command": "spec-kit-bridger.prompts.search", "title": "Spec‑Kit: Prompt Explorer filtern" },
+      { "command": "spec-kit-bridger.prompts.copy", "title": "Spec‑Kit: Prompt kopieren" },
+      { "command": "spec-kit-bridger.prompts.insert", "title": "Spec‑Kit: Prompt in Editor einfügen" },
+      { "command": "spec-kit-bridger.prompts.toggleFavorite", "title": "Spec‑Kit: Favorit umschalten" },
+      { "command": "spec-kit-bridger.prompts.openMap", "title": "Spec‑Kit: Prompt Map öffnen" },
+      { "command": "spec-kit-bridger.prompts.scan", "title": "Spec‑Kit: Prompt-Korpus scannen" },
+      { "command": "spec-kit-bridger.prompts.exportSsml", "title": "Spec‑Kit: Als SSML kopieren" },
+      { "command": "spec-kit-bridger.prompts.exportFileSsml", "title": "Spec‑Kit: Datei als SSML exportieren" }
     ],
+    "menus": {
+      "view/item/context": [
+        { "command": "spec-kit-bridger.prompts.copy", "when": "view == specKitPromptExplorer && viewItem == prompt" },
+        { "command": "spec-kit-bridger.prompts.insert", "when": "view == specKitPromptExplorer && viewItem == prompt" },
+        { "command": "spec-kit-bridger.prompts.exportSsml", "when": "view == specKitPromptExplorer && viewItem == prompt" },
+        { "command": "spec-kit-bridger.prompts.toggleFavorite", "when": "view == specKitPromptExplorer && viewItem == prompt" },
+        { "command": "spec-kit-bridger.prompts.exportFileSsml", "when": "view == specKitPromptExplorer && viewItem == file" }
+      ],
+      "view/title": [
+        { "command": "spec-kit-bridger.prompts.search", "when": "view == specKitPromptExplorer", "group": "navigation@0" },
+        { "command": "spec-kit-bridger.prompts.refresh", "when": "view == specKitPromptExplorer", "group": "navigation@1" },
+        { "command": "spec-kit-bridger.prompts.openMap", "when": "view == specKitPromptExplorer", "group": "navigation@2" },
+        { "command": "spec-kit-bridger.prompts.scan", "when": "view == specKitPromptExplorer", "group": "navigation@3" }
+      ]
+    },
     "configuration": {
       "title": "Spec-Kit BridgeR.DE",
       "properties": {

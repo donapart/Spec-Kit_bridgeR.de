@@ -6,6 +6,7 @@ import { TranslationCache } from './translation/TranslationCache';
 import { SettingsWebviewProvider } from './gui/SettingsWebviewProvider';
 import { StatusBarProvider } from './gui/StatusBarProvider';
 import { CommandCenterWebview } from './gui/CommandCenterWebview';
+import { registerPromptExplorer } from './gui/PromptExplorerProvider';
 
 let chatHandler: ChatParticipantHandler | undefined;
 let documentationView: DocumentationView | undefined;
@@ -89,6 +90,9 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage('Übersetzungs-Cache wurde geleert');
         })
     );
+
+    // Prompt Explorer registrieren
+    registerPromptExplorer(context);
 
     console.log('Spec-Kit BridgeR.DE erfolgreich aktiviert!');
 }

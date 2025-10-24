@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD024 MD022 MD032 -->
 # Changelog
 
 Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
@@ -6,6 +7,22 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
+
+## [0.2.5] - 2025-10-24
+
+### Added
+
+- 🌳 Prompt Explorer (Sidebar-View)
+  - Baumansicht des gesamten Prompt-Katalogs (Vendor → Ordner → Datei → Prompt)
+  - Kontextmenü: Prompt kopieren / in Editor einfügen
+  - Titel-Aktionen: Aktualisieren, Prompt Map öffnen, Korpus scannen
+- 🗺️ Prompt Map (leichte Webview)
+  - Klick zum Kopieren einzelner Prompts
+
+### Notes
+
+- Manifest: Neue View (`specKitPromptExplorer`) im Activitybar-Container „Spec‑Kit“ und zugehörige Commands/Menüs
+- Keine Breaking Changes; bestehende Features unverändert
 
 ## [0.2.4] - 2025-10-24
 

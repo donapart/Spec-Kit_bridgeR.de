@@ -41,6 +41,83 @@ export async function loadAgentPrompts(context: vscode.ExtensionContext): Promis
   }
 }
 
+export interface AgentTreeNode {
+  type: 'vendor' | 'folder' | 'file' | 'prompt';
+  id: string;
+  label: string;
+  children?: AgentTreeNode[];
+  fileUri?: vscode.Uri;
+  prompt?: AgentPrompt;
+}
+
+/**
+ * Baue einen vollständigen Prompt-Katalog als Baum (ohne 100er Limit).
+ */
+export async function buildPromptCatalog(context: vscode.ExtensionContext): Promise<AgentTreeNode[]> {
+  const root = vscode.Uri.joinPath(context.extensionUri, ...DOCS_ROOT);
+  const files = await listFilesRecursive(root, new Set());
+  const byVendor = new Map<string, AgentTreeNode>();
+
+  for (const file of files) {
+    const rel = file.path.replace(root.path, '').replace(/^\/+/, '');
+    const segs = rel.split('/').filter(Boolean);
+    const vendor = segs[0] || 'Misc';
+    const vendorId = `vendor:${vendor}`;
+    if (!byVendor.has(vendorId)) {
+      byVendor.set(vendorId, { type: 'vendor', id: vendorId, label: vendor, children: [] });
+    }
+    const vendorNode = byVendor.get(vendorId)!;
+
+    // Ordnerkette
+    let parent = vendorNode;
+    for (let i = 1; i < Math.max(1, segs.length - 1); i++) {
+      const folder = segs[i];
+      const folderId = `${parent.id}/folder:${folder}`;
+      let node = parent.children!.find(c => c.id === folderId);
+      if (!node) {
+        node = { type: 'folder', id: folderId, label: folder, children: [] };
+        parent.children!.push(node);
+      }
+      parent = node;
+    }
+
+    const fileName = segs[segs.length - 1] || 'file';
+    const fileId = `${parent.id}/file:${fileName}`;
+    let fileNode = parent.children!.find(c => c.id === fileId);
+    if (!fileNode) {
+      fileNode = { type: 'file', id: fileId, label: fileName, children: [], fileUri: file };
+      parent.children!.push(fileNode);
+    }
+
+    const buf = await vscode.workspace.fs.readFile(file);
+    const text = Buffer.from(buf).toString('utf8');
+    const ext = file.path.toLowerCase();
+    const prompts = ext.endsWith('.md') ? parseMarkdownAgents(text) : ext.endsWith('.txt') ? parsePlaintextAsSingle(file, text) : [];
+    for (const p of prompts) {
+      fileNode.children!.push({ type: 'prompt', id: p.id, label: p.name, prompt: p, fileUri: file });
+    }
+  }
+
+  return Array.from(byVendor.values());
+}
+
+/**
+ * Scanne Korpus und liefere Anzahl Dateien/Prompts.
+ */
+export async function scanPromptCorpus(context: vscode.ExtensionContext): Promise<{ files: number; prompts: number }>{
+  const root = vscode.Uri.joinPath(context.extensionUri, ...DOCS_ROOT);
+  const files = await listFilesRecursive(root, new Set());
+  let prompts = 0;
+  for (const file of files) {
+    const buf = await vscode.workspace.fs.readFile(file);
+    const text = Buffer.from(buf).toString('utf8');
+    const ext = file.path.toLowerCase();
+    const list = ext.endsWith('.md') ? parseMarkdownAgents(text) : ext.endsWith('.txt') ? parsePlaintextAsSingle(file, text) : [];
+    prompts += list.length;
+  }
+  return { files: files.length, prompts };
+}
+
 async function listFilesRecursive(dir: vscode.Uri, seen: Set<string>): Promise<vscode.Uri[]> {
   const out: vscode.Uri[] = [];
   try {

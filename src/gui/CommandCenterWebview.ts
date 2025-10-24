@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { loadAgentPrompts } from '../data/agentPromptLoader';
 import type { AgentPrompt } from '../data/AgentPrompt';
+import { toAzureSsml } from '../tts/speechMarkdown';
 
 /**
  * Deutsches Command Center für spec-kit
@@ -21,7 +22,8 @@ type WebviewMessage =
     | { command: 'requestAgents' }
     | { command: 'toggleFavorite'; data: { id: string } }
     | { command: 'exportAgents'; data: { onlyFavorites: boolean } }
-    | { command: 'importAgents' };
+    | { command: 'importAgents' }
+    | { command: 'exportAgentAsSsml'; data: { text: string } };
 
 export class CommandCenterWebview {
     private panel: vscode.WebviewPanel | undefined;
@@ -130,6 +132,10 @@ export class CommandCenterWebview {
             case 'importAgents':
                 await this.importAgents();
                 break;
+
+            case 'exportAgentAsSsml':
+                await this.exportTextAsSsml(message.data?.text ?? '');
+                break;
         }
     }
 
@@ -211,6 +217,18 @@ export class CommandCenterWebview {
         } catch {
             vscode.window.showErrorMessage('Import fehlgeschlagen: Ungültiges JSON');
         }
+    }
+
+    private async exportTextAsSsml(text: string): Promise<void> {
+        if (!text) {
+            vscode.window.showWarningMessage('Kein Text zum Exportieren.');
+            return;
+        }
+        const cfg = vscode.workspace.getConfiguration('spec-kit-bridger');
+        const fmt = cfg.get<'plain' | 'speechmarkdown' | 'ssml'>('tts.inputFormat', 'plain');
+        const ssml = toAzureSsml(text, fmt, 'de-DE-KatjaNeural');
+        await vscode.env.clipboard.writeText(ssml);
+        vscode.window.showInformationMessage('SSML (Azure) in die Zwischenablage kopiert.');
     }
 
     /**
@@ -1353,6 +1371,7 @@ Deliver:
                         + '<button class="btn" data-id="' + a.id + '" onclick="insertAgentPrompt(this.dataset.id)">In Editor einfügen</button>'
                         + '<button class="btn" data-id="' + a.id + '" onclick="openInChat(this.dataset.id)">→ Chat</button>'
                         + '<button class="btn" data-id="' + a.id + '" onclick="speakAgent(this.dataset.id)">🔊 Vorlesen</button>'
+                        + '<button class="btn" data-id="' + a.id + '" onclick="exportAgentAsSsml(this.dataset.id)">🗣️ Als SSML kopieren</button>'
                     + '</div>'
                 + '</div>';
             }).join('');
@@ -1381,6 +1400,12 @@ Deliver:
             const agent = agents.find(a => a.id === id);
             if (!agent) return;
             speakText(agent.prompt);
+        }
+
+        function exportAgentAsSsml(id) {
+            const agent = agents.find(a => a.id === id);
+            if (!agent) return;
+            vscode.postMessage({ command: 'exportAgentAsSsml', data: { text: agent.prompt } });
         }
 
         // Speech helpers (Deutsch)

@@ -17,6 +17,8 @@ Schreibe mit GitHub Copilot auf Deutsch und nutze die volle Power von spec-kit!
 - **English-Modus**: Original-Dokumentation
 - **Parallel-Modus**: Deutsch und Englisch nebeneinander
 - **TTS-Modus**: Dokumentation vorlesen lassen (Barrierefreiheit)
+  - 🔊 Vorlesen, ⏸️/⏹️ Steuerung
+  - 🗣️ Als SSML (Azure) kopieren – erzeugt valides Azure-SSML aus dem aktuellen Inhalt
 
 ### 🚀 Performance
 - Intelligentes Caching (bis zu 7 Tage)
@@ -36,6 +38,7 @@ Schreibe mit GitHub Copilot auf Deutsch und nutze die volle Power von spec-kit!
 - Favoriten: Stern-Button pro Agent, Filter „Nur Favoriten“
 - Export/Import als JSON (inkl. Favoriten)
 - 🔊 Vorlesen (de-DE, Web Speech API)
+ - 🗣️ Als SSML (Azure) kopieren – generiert SSML und legt es in die Zwischenablage
 
 ## 📦 Installation
 
@@ -85,6 +88,17 @@ DeepL API-Key: [https://www.deepl.com/pro-api](https://www.deepl.com/pro-api)
 ```
 
 Optionen: `"english"`, `"german"`, `"parallel"`, `"tts"`
+
+### Text-to-Speech Eingabeformat
+```json
+{
+  "spec-kit-bridger.tts.inputFormat": "plain" // oder "speechmarkdown" | "ssml"
+}
+```
+
+Hinweis:
+- Bei "speechmarkdown" werden einfache Markups clientseitig entfernt, bevor gesprochen/konvertiert wird.
+- Beim SSML-Export wird automatisch Azure-SSML mit Stimme `de-DE-KatjaNeural` erzeugt.
 
 ### Command Center öffnen
 

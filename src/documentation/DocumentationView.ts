@@ -1,15 +1,16 @@
 import * as vscode from 'vscode';
 import { TranslationService } from '../translation/TranslationService';
 import { TranslationCache } from '../translation/TranslationCache';
+import { toAzureSsml } from '../tts/speechMarkdown';
 
 export class DocumentationView {
     private panel: vscode.WebviewPanel | undefined;
     private currentMode: 'english' | 'german' | 'parallel' | 'tts' = 'german';
 
     constructor(
-        private context: vscode.ExtensionContext,
-        private translationService: TranslationService,
-        private cache: TranslationCache
+        private readonly context: vscode.ExtensionContext,
+        private readonly translationService: TranslationService,
+        private readonly cache: TranslationCache
     ) {
         // Lade gespeicherten Modus
         const config = vscode.workspace.getConfiguration('spec-kit-bridger');
@@ -44,6 +45,9 @@ export class DocumentationView {
                         break;
                     case 'loadPage':
                         await this.loadPage(message.url);
+                        break;
+                    case 'exportAsSsml':
+                        await this.exportAsSsml(typeof message.text === 'string' ? message.text : '');
                         break;
                 }
             },
@@ -190,6 +194,7 @@ Spec-Kit is a powerful extension for GitHub Copilot that helps you write better 
             <div class="tts-container">
                 <div class="tts-controls">
                     <button onclick="speakContent()">🔊 Vorlesen</button>
+                    <button onclick="copyAsSsml()">🗣️ Als SSML kopieren</button>
                     <button onclick="pauseSpeech()">⏸️ Pause</button>
                     <button onclick="stopSpeech()">⏹️ Stop</button>
                 </div>
@@ -355,6 +360,11 @@ Spec-Kit is a powerful extension for GitHub Copilot that helps you write better 
             speechSynthesis.speak(utterance);
         }
 
+        function copyAsSsml() {
+            const text = document.getElementById('content').innerText;
+            vscode.postMessage({ command: 'exportAsSsml', text });
+        }
+
         function pauseSpeech() {
             speechSynthesis.pause();
         }
@@ -377,6 +387,18 @@ Spec-Kit is a powerful extension for GitHub Copilot that helps you write better 
     </script>
 </body>
 </html>`;
+    }
+
+    private async exportAsSsml(text: string): Promise<void> {
+        if (!text) {
+            vscode.window.showWarningMessage('Kein Text zum Exportieren.');
+            return;
+        }
+        const cfg = vscode.workspace.getConfiguration('spec-kit-bridger');
+        const fmt = cfg.get<'plain' | 'speechmarkdown' | 'ssml'>('tts.inputFormat', 'plain');
+        const ssml = toAzureSsml(text, fmt, 'de-DE-KatjaNeural');
+        await vscode.env.clipboard.writeText(ssml);
+        vscode.window.showInformationMessage('SSML (Azure) in die Zwischenablage kopiert.');
     }
 
     private getNonce() {

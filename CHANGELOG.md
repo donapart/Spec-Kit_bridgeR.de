@@ -6,6 +6,19 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
+## [0.2.3] - 2025-10-24
+
+### Added
+
+- 🗣️ SSML-Export (Azure) direkt aus der UI
+  - Agents-Tab: Button „Als SSML kopieren“ pro Agent (kopiert Azure-SSML in die Zwischenablage)
+  - Dokumentation (TTS-Modus): Button „Als SSML kopieren“ für den sichtbaren Inhalt
+- Respektiert die Einstellung `spec-kit-bridger.tts.inputFormat` (plain | speechmarkdown | ssml) bei der SSML-Erzeugung
+
+### Notes
+
+- Standardstimme: `de-DE-KatjaNeural`. Anpassung folgt als Setting.
+
 ## [0.2.2] - 2025-10-24
 
 ### Added
@@ -189,6 +202,8 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - `Security` - Security-Fixes
 
 [Unreleased]: https://github.com/spec-kit/bridger-de/compare/v0.1.0...HEAD
+[0.2.3]: https://github.com/spec-kit/bridger-de/releases/tag/v0.2.3
+[0.2.2]: https://github.com/spec-kit/bridger-de/releases/tag/v0.2.2
 [0.2.1]: https://github.com/spec-kit/bridger-de/releases/tag/v0.2.1
 [0.2.0]: https://github.com/spec-kit/bridger-de/releases/tag/v0.2.0
 [0.1.0]: https://github.com/spec-kit/bridger-de/releases/tag/v0.1.0

@@ -2,7 +2,7 @@
   "name": "spec-kit-bridger-de",
   "displayName": "Spec-Kit BridgeR.DE",
   "description": "Deutsche Übersetzungs-Bridge für spec-kit GitHub Copilot Chat",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "publisher": "spec-kit",
   "engines": {
     "vscode": "^1.85.0"

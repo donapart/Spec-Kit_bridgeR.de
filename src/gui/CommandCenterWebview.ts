@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { loadAgentPrompts } from '../data/agentPromptLoader';
 import type { AgentPrompt } from '../data/AgentPrompt';
 import { toAzureSsml } from '../tts/speechMarkdown';
+import { localizeAgents, type UiLang } from '../data/agentPromptLocalizer';
+import { TranslationService } from '../translation/TranslationService';
 
 /**
  * Deutsches Command Center für spec-kit
@@ -28,8 +30,11 @@ type WebviewMessage =
 export class CommandCenterWebview {
     private panel: vscode.WebviewPanel | undefined;
     private agentsCache: AgentPrompt[] = [];
+    private translationService: TranslationService;
 
-    constructor(private readonly context: vscode.ExtensionContext) {}
+    constructor(private readonly context: vscode.ExtensionContext) {
+        this.translationService = new TranslationService(context);
+    }
 
     /**
      * Show the German Command Center
@@ -143,8 +148,23 @@ export class CommandCenterWebview {
         try {
             const agents = await loadAgentPrompts(this.context);
             this.agentsCache = agents;
+
+            // UI-Sprache aus Einstellungen lesen (Standard: de)
+            const cfg = vscode.workspace.getConfiguration('spec-kit-bridger');
+            const uiLang = cfg.get<'de' | 'en'>('agents.language', 'de') as UiLang;
+
+            // Übersetzungsfunktion bereitstellen (optional)
+            const translateFn = async (text: string) => {
+                const res = await this.translationService.translate(text, {
+                    targetLang: uiLang === 'de' ? 'DE' : 'EN',
+                    preserveCodeBlocks: true
+                });
+                return res.text;
+            };
+
+            const localized = await localizeAgents(agents, uiLang, translateFn);
             const favorites = Array.from(this.getFavorites());
-            this.panel?.webview.postMessage({ command: 'setAgents', data: { agents, favorites } });
+            this.panel?.webview.postMessage({ command: 'setAgents', data: { agents: localized, favorites } });
         } catch (err) {
             console.error('Fehler beim Laden der Agents', err);
         }
@@ -314,7 +334,10 @@ export class CommandCenterWebview {
      * Generate HTML content for webview
      */
     private getHtmlContent(): string {
-        const ttsFormat = vscode.workspace.getConfiguration('spec-kit-bridger').get<'plain' | 'speechmarkdown' | 'ssml'>('tts.inputFormat', 'plain');
+    const ttsFormat = vscode.workspace.getConfiguration('spec-kit-bridger').get<'plain' | 'speechmarkdown' | 'ssml'>('tts.inputFormat', 'plain');
+    const cfg = vscode.workspace.getConfiguration('spec-kit-bridger');
+    const uiLang = cfg.get<'de' | 'en'>('agents.language', 'de');
+    const visualMode = cfg.get<'minimal' | 'standard' | 'rich'>('agents.visualMode', 'standard');
         return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -610,6 +633,58 @@ export class CommandCenterWebview {
             color: var(--vscode-descriptionForeground);
             font-size: 14px;
             margin-top: 5px;
+        }
+
+        .subtle {
+            color: var(--vscode-descriptionForeground);
+            opacity: 0.8;
+        }
+
+        .en-subtle {
+            color: var(--vscode-descriptionForeground);
+            opacity: 0.7;
+            font-size: 12px;
+        }
+
+        .lang-toggle {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .lang-toggle .btn {
+            padding: 4px 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: var(--vscode-button-secondaryBackground);
+            color: var(--vscode-button-secondaryForeground);
+            font-size: 12px;
+        }
+
+        .mini-flow {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--vscode-descriptionForeground);
+            margin-top: 10px;
+        }
+        .mini-flow .node {
+            background: var(--vscode-textBlockQuote-background);
+            padding: 4px 6px;
+            border-radius: 4px;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .mini-flow .arrow {
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -1003,6 +1078,11 @@ const Component = () => {
                 </label>
                 <button class="btn" onclick="exportAgents()">⬇️ Export</button>
                 <button class="btn" onclick="importAgents()">⬆️ Import</button>
+                <div class="lang-toggle" title="Anzeigesprache (nur Webview)">
+                    <span class="subtle">Sprache:</span>
+                    <button id="lang-de" class="btn" onclick="setUiLang('de')">DE</button>
+                    <button id="lang-en" class="btn" onclick="setUiLang('en')">EN</button>
+                </div>
             </div>
 
             <div style="display:flex; gap:8px; margin: 6px 0 14px 0; align-items:center;">
@@ -1016,6 +1096,8 @@ const Component = () => {
     <script>
         const vscode = acquireVsCodeApi();
         const TTS_FORMAT = ${JSON.stringify(ttsFormat)};
+        let UI_LANG = ${JSON.stringify(uiLang)};
+    let VISUAL_MODE = ${JSON.stringify(visualMode)};
         function preprocessForTts(text) {
             try {
                 if (TTS_FORMAT === 'speechmarkdown') {
@@ -1028,6 +1110,18 @@ const Component = () => {
                 }
             } catch {}
             return text;
+        }
+
+        function setUiLang(lang) {
+            UI_LANG = lang === 'en' ? 'en' : 'de';
+            // Toggle button styles
+            try {
+                document.getElementById('lang-de').style.background = UI_LANG === 'de' ? getComputedStyle(document.documentElement).getPropertyValue('--vscode-button-background') : 'transparent';
+                document.getElementById('lang-de').style.color = UI_LANG === 'de' ? getComputedStyle(document.documentElement).getPropertyValue('--vscode-button-foreground') : getComputedStyle(document.documentElement).getPropertyValue('--vscode-foreground');
+                document.getElementById('lang-en').style.background = UI_LANG === 'en' ? getComputedStyle(document.documentElement).getPropertyValue('--vscode-button-background') : 'transparent';
+                document.getElementById('lang-en').style.color = UI_LANG === 'en' ? getComputedStyle(document.documentElement).getPropertyValue('--vscode-button-foreground') : getComputedStyle(document.documentElement).getPropertyValue('--vscode-foreground');
+            } catch {}
+            renderAgents();
         }
         
         // Tab switching
@@ -1351,21 +1445,56 @@ Deliver:
             const cat = catEl && catEl.value ? catEl.value : '';
             const onlyFavsEl = document.getElementById('only-favorites');
             const onlyFavs = !!(onlyFavsEl && onlyFavsEl.checked);
-            const filtered = agents.filter(a =>
-                (!q || a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q)) &&
-                (!cat || a.category === cat) &&
-                (!onlyFavs || favorites.has(a.id))
-            );
+            const filtered = agents.filter(a => {
+                const name = (UI_LANG === 'de' ? (a.displayName || a.name) : a.name) || '';
+                const desc = (UI_LANG === 'de' ? (a.displayDescription || a.description) : (a.description || a.displayDescription)) || '';
+                const matchesQuery = !q || name.toLowerCase().includes(q) || desc.toLowerCase().includes(q);
+                const matchesCat = !cat || a.category === cat || (UI_LANG === 'de' && a.categoryDe && a.categoryDe === cat);
+                const matchesFav = !onlyFavs || favorites.has(a.id);
+                return matchesQuery && matchesCat && matchesFav;
+            });
+            function catIcon(cat){
+                switch(cat){
+                    case 'Product': return '🎯';
+                    case 'Growth': return '📈';
+                    case 'Research': return '🔬';
+                    case 'Revenue': return '💰';
+                    case 'Analytics': return '📊';
+                    case 'Architecture': return '🏗️';
+                    case 'Code': return '💻';
+                    case 'Backend': return '🛠️';
+                    case 'Database': return '🗄️';
+                    default: return '🧩';
+                }
+            }
             grid.innerHTML = filtered.map(function(a) {
                 const isFav = favorites.has(a.id);
+                const mainName = UI_LANG === 'de' ? (a.displayName || a.name) : a.name;
+                const sideName = UI_LANG === 'de' ? ((a.displayName && a.displayName !== a.name) ? a.name : '') : (a.displayName ? a.displayName : '');
+                const mainDesc = UI_LANG === 'de' ? (a.displayDescription || a.description || '') : (a.description || a.displayDescription || '');
+                const sideDesc = UI_LANG === 'de' ? ((a.displayDescription && a.displayDescription !== a.description) ? (a.description || '') : '') : (a.displayDescription || '');
+                const categoryLabel = UI_LANG === 'de' ? (a.categoryDe || a.category) : a.category;
+                const icon = catIcon(a.category);
+                const miniFlow = VISUAL_MODE === 'rich' || VISUAL_MODE === 'standard'
+                    ? ('<div class="mini-flow">'
+                        + '<div class="node">Input</div>'
+                        + '<div class="arrow">→</div>'
+                        + '<div class="node">' + icon + ' ' + (mainName || '') + '</div>'
+                        + '<div class="arrow">→</div>'
+                        + '<div class="node">Output</div>'
+                      + '</div>')
+                    : '';
                 return '<div class="command-card">'
                     + '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">'
-                        + '<div class="command-icon">🧩</div>'
+                        + '<div class="command-icon">' + icon + '</div>'
                         + '<button title="Favorit umschalten" class="btn" data-id="' + a.id + '" onclick="toggleFavorite(this.dataset.id)">' + (isFav ? '★' : '☆') + '</button>'
                     + '</div>'
-                    + '<div class="command-name">' + a.name + (isFav ? ' <span title="Favorit">★</span>' : '') + '</div>'
-                    + '<div class="command-description" style="margin-bottom:10px;">Kategorie: ' + a.category + '</div>'
-                    + '<div class="command-description">' + a.description + '</div>'
+                    + '<div class="command-name">' + mainName + (isFav ? ' <span title="Favorit">★</span>' : '') + '</div>'
+                    + (sideName ? '<div class="en-subtle">' + sideName + '</div>' : '')
+                    + '<div class="command-description" style="margin-bottom:6px;">Kategorie: ' + categoryLabel + '</div>'
+                    + '<div class="command-description">' + mainDesc + '</div>'
+                    + (UI_LANG === 'de' && sideDesc ? '<div class="en-subtle" style="margin-top:4px;">' + sideDesc + '</div>' : '')
+                    + miniFlow
                     + '<div style="display:flex; gap:10px; margin-top:15px; flex-wrap: wrap;">'
                         + '<button class="btn btn-primary" data-id="' + a.id + '" onclick="copyAgentPrompt(this.dataset.id)">In Chat kopieren</button>'
                         + '<button class="btn" data-id="' + a.id + '" onclick="insertAgentPrompt(this.dataset.id)">In Editor einfügen</button>'
@@ -1380,32 +1509,37 @@ Deliver:
         function copyAgentPrompt(id) {
             const agent = agents.find(a => a.id === id);
             if (!agent) return;
-            vscode.postMessage({ command: 'copyAgentPrompt', data: { text: agent.prompt } });
+            const text = UI_LANG === 'de' ? (agent.displayPrompt || agent.prompt) : agent.prompt;
+            vscode.postMessage({ command: 'copyAgentPrompt', data: { text } });
         }
 
         function insertAgentPrompt(id) {
             const agent = agents.find(a => a.id === id);
             if (!agent) return;
-            vscode.postMessage({ command: 'insertAgentPrompt', data: { text: agent.prompt } });
+            const text = UI_LANG === 'de' ? (agent.displayPrompt || agent.prompt) : agent.prompt;
+            vscode.postMessage({ command: 'insertAgentPrompt', data: { text } });
         }
 
         function openInChat(id) {
             const agent = agents.find(a => a.id === id);
             if (!agent) return;
             vscode.postMessage({ command: 'openChat' });
-            vscode.postMessage({ command: 'copyAgentPrompt', data: { text: agent.prompt } });
+            const text = UI_LANG === 'de' ? (agent.displayPrompt || agent.prompt) : agent.prompt;
+            vscode.postMessage({ command: 'copyAgentPrompt', data: { text } });
         }
 
         function speakAgent(id) {
             const agent = agents.find(a => a.id === id);
             if (!agent) return;
-            speakText(agent.prompt);
+            const text = UI_LANG === 'de' ? (agent.displayPrompt || agent.prompt) : agent.prompt;
+            speakText(text);
         }
 
         function exportAgentAsSsml(id) {
             const agent = agents.find(a => a.id === id);
             if (!agent) return;
-            vscode.postMessage({ command: 'exportAgentAsSsml', data: { text: agent.prompt } });
+            const text = UI_LANG === 'de' ? (agent.displayPrompt || agent.prompt) : agent.prompt;
+            vscode.postMessage({ command: 'exportAgentAsSsml', data: { text } });
         }
 
         // Speech helpers (Deutsch)
@@ -1466,6 +1600,8 @@ Deliver:
         setTimeout(function() {
             renderAgents();
             vscode.postMessage({ command: 'requestAgents' });
+            // init lang toggle
+            setUiLang(UI_LANG);
         }, 0);
     </script>
 </body>

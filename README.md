@@ -39,6 +39,11 @@ Schreibe mit GitHub Copilot auf Deutsch und nutze die volle Power von spec-kit!
 - Export/Import als JSON (inkl. Favoriten)
 - 🔊 Vorlesen (de-DE, Web Speech API)
  - 🗣️ Als SSML (Azure) kopieren – generiert SSML und legt es in die Zwischenablage
+ - 🇩🇪 German-first Anzeige mit 🇬🇧 Original-Begriffen dezent daneben (kleiner, blasser)
+ - 🔁 Sprachumschalter (DE/EN) direkt in der Toolbar der Agents-Ansicht
+ - 🎨 Visualisierungsmodi: minimal | standard | rich
+   - standard/rich: Kategorie-Icons und Mini-Skizze „Input → Agent → Output“ je Karte
+   - rich: vorbereitet für erweiterte Previews (Vorher/Nachher)
 
 ## 📦 Installation
 
@@ -100,6 +105,17 @@ Hinweis:
 - Bei "speechmarkdown" werden einfache Markups clientseitig entfernt, bevor gesprochen/konvertiert wird.
 - Beim SSML-Export wird automatisch Azure-SSML mit Stimme `de-DE-KatjaNeural` erzeugt.
 
+  ### Agents-Anzeige (Sprache & Visualisierung)
+  ```json
+  {
+    "spec-kit-bridger.agents.language": "de",      // oder "en" (initiale UI-Sprache)
+    "spec-kit-bridger.agents.visualMode": "standard" // "minimal" | "standard" | "rich"
+  }
+  ```
+  Hinweise:
+  - Die Sprachwahl kann zusätzlich live in der Agents-Toolbar (DE/EN) umgeschaltet werden.
+  - Im DE-Modus wird die deutsche Fassung groß gezeigt; das englische Original erscheint dezent daneben.
+
 ### Command Center öffnen
 
 Öffne die Befehls-Palette und wähle:
@@ -114,6 +130,8 @@ Im Command Center → Tab „🧠 Agents“:
 - ⬇️ Export / ⬆️ Import: Agents und Favoriten als JSON sichern/laden
 - „→ Chat“ öffnet den Chat und kopiert den Prompt automatisch
 - 🔊 Vorlesen: deutscher TTS mit Pause/Stop
+ - DE/EN: Anzeige-Sprache live wechseln
+ - Visualisierungsmodus: je nach Einstellung (Icons, Mini-Flow)
 
 ## 🎮 Verwendung
 

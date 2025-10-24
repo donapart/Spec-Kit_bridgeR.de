@@ -2,7 +2,7 @@
   "name": "spec-kit-bridger-de",
   "displayName": "Spec-Kit BridgeR.DE",
   "description": "Deutsche Übersetzungs-Bridge für spec-kit GitHub Copilot Chat",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "publisher": "spec-kit",
   "engines": {
     "vscode": "^1.85.0"
@@ -190,6 +190,25 @@
           ],
           "default": "plain",
           "description": "Eingabeformat für Vorlesen: Plain (Standard), Speech Markdown oder SSML (Export vorgesehen)."
+        },
+        "spec-kit-bridger.agents.language": {
+          "type": "string",
+          "enum": [
+            "de",
+            "en"
+          ],
+          "default": "de",
+          "description": "Anzeigesprache für die Agent Prompt Library (Standard: Deutsch)."
+        },
+        "spec-kit-bridger.agents.visualMode": {
+          "type": "string",
+          "enum": [
+            "minimal",
+            "standard",
+            "rich"
+          ],
+          "default": "standard",
+          "description": "Visualisierungsdichte für Agenten-Karten (Symbole/Skizzen/Vorher-Nachher)."
         }
       }
     }

@@ -6,6 +6,27 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
+
+## [0.2.4] - 2025-10-24
+
+### Added
+
+- 🇩🇪 German-first Agents UI mit 🇬🇧 Original-Begriffen dezent daneben (kleiner, blasser)
+- 🔁 Sprachumschalter (DE/EN) in der Agents-Toolbar (nur Webview-Ansicht)
+- 🎨 Visualisierungsmodi für Agent-Karten
+  - `minimal` | `standard` | `rich`
+  - `standard`/`rich`: Kategorie-Icons und Mini-Skizze „Input → Agent → Output“
+  - `rich`: vorbereitet für zukünftige Vorher/Nachher-Previews
+
+### Config
+
+- `spec-kit-bridger.agents.language` (de|en, default: de)
+- `spec-kit-bridger.agents.visualMode` (minimal|standard|rich, default: standard)
+
+### Notes
+
+- Aktionen (Kopieren/Einfügen/→ Chat/Vorlesen/SSML-Export) verwenden, falls vorhanden, die lokalisierte Prompt-Variante.
+
 ## [0.2.3] - 2025-10-24
 
 ### Added

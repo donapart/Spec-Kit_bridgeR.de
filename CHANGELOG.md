@@ -1,0 +1,141 @@
+# Changelog
+
+Alle wichtigen Änderungen an diesem Projekt werden in dieser Datei dokumentiert.
+
+Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
+und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
+
+## [Unreleased]
+
+### Geplant
+- Sidebar Panel für Übersetzungs-Historie
+- Welcome Screen mit Onboarding
+- Context Memory für Gesprächsverlauf
+- Custom Prompts (Nutzer-definierbar)
+
+## [0.1.1] - 2025-10-24
+
+### Added
+- 🎨 **Grafische Benutzeroberfläche!**
+  - ⚙️ Settings Webview mit visueller Provider-Konfiguration
+  - 📊 Status Bar Integration (zeigt aktuellen Provider)
+  - ⚡ Quick Pick Menu für schnellen Provider-Wechsel
+  - 🔑 Visuelles API-Key Management
+  
+- 🌐 **4 neue Translation Provider!**
+  - ✅ Google Cloud Translation (500k Zeichen/Monat frei)
+  - ✅ Microsoft Azure Translator (2M Zeichen/Monat frei!)
+  - ✅ LibreTranslate (Open Source, kostenlos, selbst hostbar)
+  - ✅ DeepL weiterhin verfügbar (beste Qualität)
+  
+- 📚 **Dokumentation**
+  - `docs/TRANSLATION_PROVIDERS.md` - Komplette Setup-Anleitung
+  - Vergleichstabelle für alle Provider
+  - Schritt-für-Schritt Tutorials
+  - Troubleshooting Guide
+
+### Changed
+- TranslationService erweitert mit Factory Pattern
+- Package.json mit neuen Config-Optionen
+- Provider können jetzt per GUI oder Quick Pick gewechselt werden
+
+### Features im Detail
+
+#### Settings GUI (Webview)
+- Provider-Cards mit Badges (Free/Premium/Paid)
+- Inline-Konfiguration pro Provider
+- Test-Buttons für API-Verbindungen
+- Erweiterte Einstellungen (Cache, Streaming, Code-Protection)
+- Erfolgs-/Fehler-Feedback
+- Direkter Link zur Provider-Dokumentation
+
+#### Status Bar
+- Icon-basierte Provider-Anzeige
+- Tooltip mit Details
+- Click öffnet Quick Pick
+- Auto-Update bei Config-Änderung
+
+#### Quick Pick Provider-Switcher
+- Alle Provider mit Icons & Beschreibungen
+- Zeigt Free Tier Details
+- Warnung bei fehlenden API-Keys
+- Direkter Link zu Settings GUI
+
+### Developer Experience
+- TypeScript Compilation: 0 Errors
+- Code-Block Preservation in allen Providern
+- Einheitliches Error Handling
+- Deutsche Fehlermeldungen
+
+## [0.1.0] - 2025-10-24
+
+### Added
+- ✨ Initiales Release der Extension
+- 🎯 Chat Participant `@de` für deutsche spec-kit Anfragen
+- 🔄 TranslationService mit Mock und DeepL Provider
+- 💾 Intelligentes Caching-System (7 Tage Retention)
+- 📋 Chat-Commands: `/test`, `/plan`, `/implement`, `/review`, `/debug`, `/docs`
+- 📚 Dokumentations-Viewer mit 4 Modi (EN/DE/Parallel/TTS)
+- ⚙️ VS Code Settings für Provider-Konfiguration
+- 🛠️ Development Setup mit TypeScript, ESLint
+- 🚀 CI/CD Pipeline mit GitHub Actions
+- 📖 Umfassende README und CONTRIBUTING Dokumentation
+
+### Features im Detail
+
+#### Translation Service
+- Mock-Provider für kostenlose Tests
+- DeepL-Provider mit Free/Pro API Support
+- Code-Block-Preservation (Code wird nie übersetzt)
+- Automatisches Formatting-Preservation
+
+#### Chat Integration
+- Test-Command zur Übersetzungsvalidierung
+- Routing zu spec-kit Commands
+- Cache-Statistiken im Test-Modus
+- Error Handling mit Fallbacks
+
+#### Documentation View
+- Webview mit Mode-Switcher
+- English-Modus: Original-Dokumentation
+- German-Modus: Vollübersetzung
+- Parallel-Modus: EN/DE nebeneinander
+- TTS-Modus: Vorlesen mit Web Speech API
+
+#### Entwicklung
+- TypeScript Strict Mode
+- ESLint Konfiguration
+- Debugging-Setup für Extension Development
+- VS Code Tasks für Build & Test
+
+### Developer Experience
+- 📦 npm scripts für alle wichtigen Tasks
+- 🔧 Launch-Konfiguration für F5-Debugging
+- 📊 ESLint für Code-Qualität
+- 🧪 Test-Framework Setup (vorbereitet)
+
+### Bekannte Limitierungen
+- Dokumentation zeigt Placeholder-Content (GitHub API kommt in Phase 3)
+- Response-Übersetzung noch nicht implementiert
+- Streaming-Support fehlt noch
+- Keine E2E-Tests vorhanden
+
+## [0.0.1] - 2025-10-24 (Pre-Release)
+
+### Added
+- Projekt-Setup
+- Basis-Struktur
+
+---
+
+## Format-Erklärung
+
+- `Added` - Neue Features
+- `Changed` - Änderungen an bestehenden Features
+- `Deprecated` - Features, die bald entfernt werden
+- `Removed` - Entfernte Features
+- `Fixed` - Bug-Fixes
+- `Security` - Security-Fixes
+
+[Unreleased]: https://github.com/spec-kit/bridger-de/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/spec-kit/bridger-de/releases/tag/v0.1.0

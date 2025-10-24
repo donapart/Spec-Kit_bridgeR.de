@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Background -->
+  <rect width="128" height="128" rx="20" fill="#0078D4"/>
+  
+  <!-- German Flag Colors -->
+  <rect x="24" y="32" width="80" height="12" fill="#000000"/>
+  <rect x="24" y="44" width="80" height="12" fill="#DD0000"/>
+  <rect x="24" y="56" width="80" height="12" fill="#FFCE00"/>
+  
+  <!-- Bridge Symbol -->
+  <path d="M 24 72 Q 64 52, 104 72" stroke="#FFFFFF" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M 24 72 Q 64 52, 104 72" stroke="#0078D4" stroke-width="2" fill="none" stroke-linecap="round"/>
+  
+  <!-- Pillars -->
+  <rect x="34" y="72" width="4" height="20" fill="#FFFFFF"/>
+  <rect x="62" y="62" width="4" height="30" fill="#FFFFFF"/>
+  <rect x="90" y="72" width="4" height="20" fill="#FFFFFF"/>
+  
+  <!-- Translation Arrows -->
+  <g fill="#FFFFFF">
+    <!-- DE -->
+    <text x="20" y="104" font-family="Arial, sans-serif" font-size="16" font-weight="bold">DE</text>
+    <!-- Arrows -->
+    <path d="M 42 98 L 52 98 L 48 94 M 52 98 L 48 102" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+    <path d="M 76 98 L 86 98 L 82 94 M 86 98 L 82 102" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+    <!-- EN -->
+    <text x="92" y="104" font-family="Arial, sans-serif" font-size="16" font-weight="bold">EN</text>
+  </g>
+  
+  <!-- Spec-Kit Badge -->
+  <rect x="44" y="110" width="40" height="14" rx="7" fill="#FFFFFF" opacity="0.9"/>
+  <text x="64" y="120" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#0078D4" text-anchor="middle">spec-kit</text>
+</svg>

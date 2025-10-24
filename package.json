@@ -1,0 +1,221 @@
+{
+  "name": "spec-kit-bridger-de",
+  "displayName": "Spec-Kit BridgeR.DE",
+  "description": "Deutsche Übersetzungs-Bridge für spec-kit GitHub Copilot Chat",
+  "version": "0.2.0",
+  "publisher": "spec-kit",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Education"
+  ],
+  "keywords": [
+    "spec-kit",
+    "translation",
+    "german",
+    "deutsch",
+    "copilot",
+    "chat",
+    "documentation"
+  ],
+  "activationEvents": [
+    "onLanguage:*",
+    "onCommand:spec-kit-bridger.openCommandCenter",
+    "onCommand:spec-kit-bridger.openSettings",
+    "onCommand:spec-kit-bridger.showDocs",
+    "onCommand:spec-kit-bridger.switchMode",
+    "onCommand:spec-kit-bridger.clearCache"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "spec-kit-bridger.de",
+        "name": "de",
+        "description": "Deutsche Bridge für spec-kit - Schreibe auf Deutsch, Copilot versteht es!",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "test",
+            "description": "Teste die Übersetzungsfunktion"
+          },
+          {
+            "name": "plan",
+            "description": "Erstelle einen Plan auf Deutsch"
+          },
+          {
+            "name": "implement",
+            "description": "Implementiere Features auf Deutsch"
+          },
+          {
+            "name": "review",
+            "description": "Code-Review auf Deutsch"
+          },
+          {
+            "name": "debug",
+            "description": "Debugging-Hilfe auf Deutsch"
+          },
+          {
+            "name": "docs",
+            "description": "Zeige spec-kit Dokumentation (EN/DE/Parallel/TTS)"
+          }
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "spec-kit-bridger.openCommandCenter",
+        "title": "Spec-Kit: 🚀 Command Center öffnen",
+        "category": "Spec-Kit",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "spec-kit-bridger.openSettings",
+        "title": "Spec-Kit: ⚙️ Einstellungen öffnen",
+        "category": "Spec-Kit"
+      },
+      {
+        "command": "spec-kit-bridger.showDocs",
+        "title": "Spec-Kit: Dokumentation anzeigen"
+      },
+      {
+        "command": "spec-kit-bridger.switchMode",
+        "title": "Spec-Kit: Anzeigemodus wechseln"
+      },
+      {
+        "command": "spec-kit-bridger.clearCache",
+        "title": "Spec-Kit: Übersetzungs-Cache leeren"
+      }
+    ],
+    "configuration": {
+      "title": "Spec-Kit BridgeR.DE",
+      "properties": {
+        "spec-kit-bridger.translationProvider": {
+          "type": "string",
+          "enum": [
+            "mock",
+            "deepl",
+            "google",
+            "microsoft",
+            "libretranslate"
+          ],
+          "default": "mock",
+          "enumDescriptions": [
+            "Mock-Provider (keine echte Übersetzung, nur für Tests)",
+            "DeepL API (beste Qualität, kostenpflichtig nach 500k Zeichen/Monat)",
+            "Google Cloud Translation (kostenlos bis 500k Zeichen/Monat)",
+            "Microsoft Azure Translator (kostenlos bis 2M Zeichen/Monat)",
+            "LibreTranslate (kostenlos, Open Source, selbst hostbar)"
+          ],
+          "description": "Übersetzungs-Provider auswählen"
+        },
+        "spec-kit-bridger.deepl.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "DeepL API-Key (https://www.deepl.com/pro-api)"
+        },
+        "spec-kit-bridger.deepl.apiType": {
+          "type": "string",
+          "enum": [
+            "free",
+            "pro"
+          ],
+          "default": "free",
+          "description": "DeepL API-Typ (free oder pro)"
+        },
+        "spec-kit-bridger.googleApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Google Cloud Translation API Key (https://console.cloud.google.com)"
+        },
+        "spec-kit-bridger.azureApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Microsoft Azure Translator API Key (https://portal.azure.com)"
+        },
+        "spec-kit-bridger.azureRegion": {
+          "type": "string",
+          "default": "",
+          "description": "Microsoft Azure Region (z.B. 'westeurope', 'eastus')",
+          "examples": [
+            "westeurope",
+            "eastus",
+            "westus2"
+          ]
+        },
+        "spec-kit-bridger.libreTranslateUrl": {
+          "type": "string",
+          "default": "",
+          "description": "LibreTranslate Server URL (leer = öffentliche Instanz verwenden)",
+          "examples": [
+            "https://libretranslate.com/translate",
+            "http://localhost:5000/translate"
+          ]
+        },
+        "spec-kit-bridger.documentationMode": {
+          "type": "string",
+          "enum": [
+            "english",
+            "german",
+            "parallel",
+            "tts"
+          ],
+          "default": "german",
+          "description": "Standard-Anzeigemodus für Dokumentation"
+        },
+        "spec-kit-bridger.cacheEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Übersetzungen cachen für bessere Performance"
+        },
+        "spec-kit-bridger.preserveCodeBlocks": {
+          "type": "boolean",
+          "default": true,
+          "description": "Code-Blöcke nie übersetzen (empfohlen)"
+        },
+        "spec-kit-bridger.streamingEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Progressive Übersetzung für schnellere Antworten (experimentell)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.x",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@vscode/test-electron": "^2.3.8",
+    "@vscode/vsce": "^2.22.0",
+    "eslint": "^8.56.0",
+    "glob": "^10.4.5",
+    "mocha": "^10.8.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@google-cloud/translate": "^9.2.1",
+    "deepl-node": "^1.11.0",
+    "markdown-it": "^14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spec-kit/bridger-de.git"
+  },
+  "license": "MIT"
+}

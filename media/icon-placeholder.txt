@@ -1,0 +1,14 @@
+# Placeholder für Extension Icon
+# In Produktion sollte hier ein professionelles Icon erstellt werden
+# Empfohlene Größe: 128x128px PNG
+# Design: Brücke (🌉) mit DE-Flagge (🇩🇪) kombiniert
+
+Icon sollte zeigen:
+- Eine stilisierte Brücke (Bridge-Metapher)
+- Deutsch/Englisch Sprach-Symbol
+- spec-kit Branding-Farben
+
+Tools zum Erstellen:
+- Figma/Sketch/Adobe Illustrator
+- Icon-Generatoren
+- VS Code Icon-Guidelines beachten

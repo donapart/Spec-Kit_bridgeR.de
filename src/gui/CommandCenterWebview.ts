@@ -137,7 +137,7 @@ export class CommandCenterWebview {
         try {
             const agents = await loadAgentPrompts(this.context);
             this.agentsCache = agents;
-            const favorites = this.getFavorites();
+            const favorites = Array.from(this.getFavorites());
             this.panel?.webview.postMessage({ command: 'setAgents', data: { agents, favorites } });
         } catch (err) {
             console.error('Fehler beim Laden der Agents', err);

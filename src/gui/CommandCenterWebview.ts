@@ -296,6 +296,7 @@ export class CommandCenterWebview {
      * Generate HTML content for webview
      */
     private getHtmlContent(): string {
+        const ttsFormat = vscode.workspace.getConfiguration('spec-kit-bridger').get<'plain' | 'speechmarkdown' | 'ssml'>('tts.inputFormat', 'plain');
         return `<!DOCTYPE html>
 <html lang="de">
 <head>
@@ -996,6 +997,20 @@ const Component = () => {
     
     <script>
         const vscode = acquireVsCodeApi();
+        const TTS_FORMAT = ${JSON.stringify(ttsFormat)};
+        function preprocessForTts(text) {
+            try {
+                if (TTS_FORMAT === 'speechmarkdown') {
+                    return text
+                        .replace(/\\:[a-zA-Z-]+\\([^)]*\\)/g, '')
+                        .replace(/\\[[^\\]]+\\]/g, '')
+                        .replace(/\\{[^}]+\\}/g, '')
+                        .replace(/\\s+/g, ' ')
+                        .trim();
+                }
+            } catch {}
+            return text;
+        }
         
         // Tab switching
         function switchTab(tabName) {
@@ -1371,7 +1386,7 @@ Deliver:
         // Speech helpers (Deutsch)
         function speakText(text) {
             try { speechSynthesis.cancel(); } catch (e) {}
-            const u = new SpeechSynthesisUtterance(text);
+            const u = new SpeechSynthesisUtterance(preprocessForTts(text));
             u.lang = 'de-DE';
             speechSynthesis.speak(u);
         }

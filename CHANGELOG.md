@@ -6,6 +6,16 @@ Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/de/1.0.0/),
 und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
+## [0.2.2] - 2025-10-24
+
+### Added
+- 🔊 TTS: Grundsupport für Speech Markdown
+  - Neue Einstellung: `spec-kit-bridger.tts.inputFormat` (plain | speechmarkdown | ssml)
+  - Webviews (Dokumentation, Agents) berücksichtigen Speech Markdown (Preprocessing im Client)
+
+### Notes
+- SSML-Export ist vorbereitet und folgt in einem separaten Schritt.
+
 
 ### Geplant
 

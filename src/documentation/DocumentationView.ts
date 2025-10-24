@@ -218,6 +218,7 @@ Spec-Kit is a powerful extension for GitHub Copilot that helps you write better 
 
     private async getWebviewContent(): Promise<string> {
         const nonce = this.getNonce();
+        const ttsFormat = vscode.workspace.getConfiguration('spec-kit-bridger').get<'plain' | 'speechmarkdown' | 'ssml'>('tts.inputFormat', 'plain');
 
         return `<!DOCTYPE html>
 <html lang="de">
@@ -314,6 +315,22 @@ Spec-Kit is a powerful extension for GitHub Copilot that helps you write better 
     <script nonce="${nonce}">
         const vscode = acquireVsCodeApi();
         let currentMode = '${this.currentMode}';
+        const TTS_FORMAT = ${JSON.stringify(ttsFormat)};
+
+        function preprocessForTts(text) {
+            try {
+                if (TTS_FORMAT === 'speechmarkdown') {
+                    // Minimaler Fallback: Speech Markdown Markup grob entfernen
+                    return text
+                        .replace(/\\:[a-zA-Z-]+\\([^)]*\\)/g, '') // :mark(x)
+                        .replace(/\\[[^\\]]+\\]/g, '')            // [word]
+                        .replace(/\\{[^}]+\\}/g, '')              // {options}
+                        .replace(/\\s+/g, ' ')                    // Whitespace komprimieren
+                        .trim();
+                }
+            } catch {}
+            return text;
+        }
 
         function switchMode(mode) {
             currentMode = mode;
@@ -333,7 +350,7 @@ Spec-Kit is a powerful extension for GitHub Copilot that helps you write better 
 
         function speakContent() {
             const text = document.getElementById('content').innerText;
-            const utterance = new SpeechSynthesisUtterance(text);
+            const utterance = new SpeechSynthesisUtterance(preprocessForTts(text));
             utterance.lang = 'de-DE';
             speechSynthesis.speak(utterance);
         }

@@ -2,7 +2,7 @@
   "name": "spec-kit-bridger-de",
   "displayName": "Spec-Kit BridgeR.DE",
   "description": "Deutsche Übersetzungs-Bridge für spec-kit GitHub Copilot Chat",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "publisher": "spec-kit",
   "engines": {
     "vscode": "^1.85.0"
@@ -180,6 +180,16 @@
           "type": "boolean",
           "default": true,
           "description": "Progressive Übersetzung für schnellere Antworten (experimentell)"
+        },
+        "spec-kit-bridger.tts.inputFormat": {
+          "type": "string",
+          "enum": [
+            "plain",
+            "speechmarkdown",
+            "ssml"
+          ],
+          "default": "plain",
+          "description": "Eingabeformat für Vorlesen: Plain (Standard), Speech Markdown oder SSML (Export vorgesehen)."
         }
       }
     }

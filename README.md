@@ -24,6 +24,19 @@ Schreibe mit GitHub Copilot auf Deutsch und nutze die volle Power von spec-kit!
 - Offline-Fallbacks
 - Minimale API-Kosten
 
+### 🧠 Command Center (deutsch)
+- Zentrale Webview mit Tabs: Commands, Workflows, Snippets, Templates, Lernen, Agents
+- Schnelle Aktionen: Chat öffnen, Einstellungen, Cache leeren, Statistiken
+- Vollständig lokal (kein Backend nötig)
+
+### 🧠 Agents Prompt Library
+- Dynamisches Laden aus `docs/system_prompts_leaks-main` (Markdown/TXT)
+- Suche und Kategorie-Filter
+- Aktionen: In Chat kopieren, In Editor einfügen, → Chat (öffnet Chat + kopiert)
+- Favoriten: Stern-Button pro Agent, Filter „Nur Favoriten“
+- Export/Import als JSON (inkl. Favoriten)
+- 🔊 Vorlesen (de-DE, Web Speech API)
+
 ## 📦 Installation
 
 ### Aus dem Marketplace
@@ -73,6 +86,21 @@ DeepL API-Key: [https://www.deepl.com/pro-api](https://www.deepl.com/pro-api)
 
 Optionen: `"english"`, `"german"`, `"parallel"`, `"tts"`
 
+### Command Center öffnen
+
+Öffne die Befehls-Palette und wähle:
+
+- „Spec-Kit: 🚀 Command Center öffnen“
+- „Spec-Kit: ⚙️ Einstellungen öffnen“
+
+Im Command Center → Tab „🧠 Agents“:
+
+- Suche/Kategorie-Filter nutzen, Stern für Favoriten toggeln
+- „Nur Favoriten“ toggelt die Ansicht
+- ⬇️ Export / ⬆️ Import: Agents und Favoriten als JSON sichern/laden
+- „→ Chat“ öffnet den Chat und kopiert den Prompt automatisch
+- 🔊 Vorlesen: deutscher TTS mit Pause/Stop
+
 ## 🎮 Verwendung
 
 ### Chat-Commands
@@ -121,6 +149,12 @@ npm test
 ```bash
 npm run compile
 npm run package
+```
+
+Optional: VSIX lokal installieren
+
+```bash
+code --install-extension spec-kit-bridger-de-*.vsix
 ```
 
 ## 📋 Roadmap

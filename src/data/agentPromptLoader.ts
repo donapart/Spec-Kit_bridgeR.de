@@ -7,6 +7,8 @@ export async function loadAgentPrompts(context: vscode.ExtensionContext): Promis
   try {
     const root = vscode.Uri.joinPath(context.extensionUri, ...DOCS_ROOT);
     const fileUris = await listFilesRecursive(root, new Set());
+    const cfg = vscode.workspace.getConfiguration('spec-kit-bridger');
+    const maxAgents = Math.max(0, cfg.get<number>('agents.maxAgents', 1000));
 
     const all: AgentPrompt[] = [];
 
@@ -33,8 +35,9 @@ export async function loadAgentPrompts(context: vscode.ExtensionContext): Promis
       }
     }
 
-    // Cap to 100 to keep UI snappy
-    return Array.from(unique.values()).slice(0, 100);
+    // Cap to configured max to keep UI snappy (default high)
+    const result = Array.from(unique.values());
+    return maxAgents > 0 ? result.slice(0, maxAgents) : result;
   } catch (err) {
     console.error('loadAgentPrompts error', err);
     return [];

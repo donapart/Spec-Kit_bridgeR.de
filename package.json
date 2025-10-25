@@ -290,6 +290,12 @@
           ],
           "default": "standard",
           "description": "Visualisierungsdichte für Agenten-Karten (Symbole/Skizzen/Vorher-Nachher)."
+        },
+        "spec-kit-bridger.agents.maxAgents": {
+          "type": "number",
+          "default": 1000,
+          "minimum": 0,
+          "description": "Maximale Anzahl geladener Agents im Command Center (0 = unbegrenzt). Prompt Explorer zeigt immer alle." 
         }
       }
     }

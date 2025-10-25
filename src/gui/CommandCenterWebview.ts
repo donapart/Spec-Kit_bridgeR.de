@@ -942,6 +942,7 @@ export class CommandCenterWebview {
             <div class="snippet-grid">
                 <div class="snippet-card">
                     <div class="snippet-title">Express Server Setup</div>
+                    <div class="command-description" style="margin-bottom:8px;">Minimaler Express-Server mit JSON-Parsing und Healthcheck.</div>
                     <div class="snippet-code">
 const express = require('express');
 const app = express();
@@ -955,6 +956,7 @@ app.listen(3000);
                 
                 <div class="snippet-card">
                     <div class="snippet-title">JWT Middleware</div>
+                    <div class="command-description" style="margin-bottom:8px;">Validiert Bearer-Token und stellt den Nutzer im Request zur Verfügung.</div>
                     <div class="snippet-code">
 const jwt = require('jsonwebtoken');
 function authMiddleware(req, res, next) {
@@ -968,6 +970,7 @@ function authMiddleware(req, res, next) {
                 
                 <div class="snippet-card">
                     <div class="snippet-title">React Component</div>
+                    <div class="command-description" style="margin-bottom:8px;">Einfache funktionale Komponente mit Props und Button-Action.</div>
                     <div class="snippet-code">
 import React from 'react';
 const Component = () => {
@@ -975,6 +978,24 @@ const Component = () => {
 };
                     </div>
                     <button class="btn btn-primary" onclick="insertSnippet('react-component')">
+                        Einfügen
+                    </button>
+                </div>
+
+                <div class="snippet-card">
+                    <div class="snippet-title">Fetch Helper (TS)</div>
+                    <div class="command-description" style="margin-bottom:8px;">Wrapper für Fetch mit JSON-Parsing und Fehlerbehandlung.</div>
+                    <div class="snippet-code">
+export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, init);
+  if (!res.ok) {
+    const text = await res.text();
+        throw new Error('HTTP ' + res.status + ': ' + text);
+  }
+  return res.json() as Promise<T>;
+}
+                    </div>
+                    <button class="btn btn-primary" onclick="insertSnippet('fetch-helper')">
                         Einfügen
                     </button>
                 </div>
@@ -1018,6 +1039,28 @@ const Component = () => {
                         Projekt erstellen
                     </button>
                 </div>
+
+                <div class="command-card">
+                    <div class="command-icon">🐳</div>
+                    <div class="command-name">Dockerized Service</div>
+                    <div class="command-description">
+                        Node-Service mit Dockerfile, Compose und Healthcheck
+                    </div>
+                    <button class="btn btn-primary" onclick="createFromTemplate('docker-service')">
+                        Projekt erstellen
+                    </button>
+                </div>
+
+                <div class="command-card">
+                    <div class="command-icon">🧪</div>
+                    <div class="command-name">Vitest + Playwright</div>
+                    <div class="command-description">
+                        Setup für Unit- und E2E-Tests mit Beispieltests
+                    </div>
+                    <button class="btn btn-primary" onclick="createFromTemplate('testing-stack')")>
+                        Projekt erstellen
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -1048,6 +1091,32 @@ const Component = () => {
                         </div>
                     </div>
                     <button class="btn btn-primary" onclick="startTutorial('advanced')">
+                        Tutorial starten
+                    </button>
+                </div>
+
+                <div class="workflow-card">
+                    <div class="workflow-header">
+                        <div class="workflow-icon">🧭</div>
+                        <div>
+                            <div class="workflow-title">Prompt Engineering Crashkurs</div>
+                            <div class="command-description">Struktur, Rollen, Constraints, Beispiele, Evaluierung</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="startTutorial('prompt-engineering')">
+                        Tutorial starten
+                    </button>
+                </div>
+
+                <div class="workflow-card">
+                    <div class="workflow-header">
+                        <div class="workflow-icon">🗣️</div>
+                        <div>
+                            <div class="workflow-title">TTS & SSML Praxis</div>
+                            <div class="command-description">Speech Markdown, SSML und Azure-Voices einsetzen</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="startTutorial('tts-ssml')">
                         Tutorial starten
                     </button>
                 </div>
@@ -1250,6 +1319,11 @@ const Component: React.FC<ComponentProps> = ({ title, onAction }) => {
 };
 
 export default Component;\`,
+                    language: 'typescript'
+                }
+                ,
+                'fetch-helper': {
+                    code: \`export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {\n  const res = await fetch(url, init);\n  if (!res.ok) {\n    const text = await res.text();\n    throw new Error(\`HTTP \${res.status}: \${text}\`);\n  }\n  return res.json() as Promise<T>;\n}\`,
                     language: 'typescript'
                 }
             };

@@ -8,6 +8,30 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.2.6] - 2025-10-25
+
+### Added
+
+- 🧠 Chat: Eingabesprache Auto-Detection (DE/EN) mit Heuristik
+  - Neue Einstellung: `spec-kit-bridger.chat.inputLanguage` (auto | de | en, default: auto)
+  - Überspringt DE→EN-Übersetzung, wenn Eingabe Englisch ist
+- 🔀 Chat: Ausgabesprache konfigurierbar
+  - Neue Einstellung: `spec-kit-bridger.chat.outputLanguage` (match-input | de | en, default: match-input)
+  - Bei `match-input`: Antwortsprache folgt der Eingabesprache
+- ⏳ Chat: Statusleisten-Spinner während Streaming/Anfrage
+  - Neue Einstellung: `spec-kit-bridger.chat.showStreamingStatus` (boolean, default: true)
+  - Zeigt `$(sync~spin)` während LLM-Anfrage/Streaming
+
+### Changed
+
+- Streaming: Bei Ausgabesprache EN wird der LLM-Output direkt durchgestreamt (keine Übersetzung), inkl. Markdown-Bereinigung
+- Batch: Antwort wird abhängig von `outputLanguage` übersetzt oder nur bereinigt
+
+### Notes
+
+- Keine Breaking Changes; bestehende Funktionen unverändert
+- Heuristik bewusst leichtgewichtig (Umlaute + häufige Wörter)
+
 ## [0.2.5] - 2025-10-24
 
 ### Added
@@ -240,6 +264,7 @@ und dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - `Security` - Security-Fixes
 
 [Unreleased]: https://github.com/spec-kit/bridger-de/compare/v0.1.0...HEAD
+[0.2.6]: https://github.com/spec-kit/bridger-de/releases/tag/v0.2.6
 [0.2.3]: https://github.com/spec-kit/bridger-de/releases/tag/v0.2.3
 [0.2.2]: https://github.com/spec-kit/bridger-de/releases/tag/v0.2.2
 [0.2.1]: https://github.com/spec-kit/bridger-de/releases/tag/v0.2.1

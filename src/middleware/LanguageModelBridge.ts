@@ -46,8 +46,19 @@ export class LanguageModelBridge {
         token: vscode.CancellationToken
     ): Promise<LanguageModelResponse> {
         try {
-            // 1. Prompt DE → EN übersetzen
-            const translatedPrompt = await this.translateInput(request.prompt);
+            const cfg = vscode.workspace.getConfiguration('spec-kit-bridger');
+            const showStatus = cfg.get<boolean>('chat.showStreamingStatus', true);
+            const inputLangSetting = cfg.get<'auto' | 'de' | 'en'>('chat.inputLanguage', 'auto');
+            const outputLangSetting = cfg.get<'match-input' | 'de' | 'en'>('chat.outputLanguage', 'match-input');
+
+            // Spracheingabe bestimmen
+            const detected = inputLangSetting === 'auto' ? this.detectLanguage(request.prompt) : inputLangSetting;
+            const shouldTranslateInput = detected === 'de';
+
+            // 1. Prompt ggf. DE → EN übersetzen
+            const translatedPrompt = shouldTranslateInput
+                ? await this.translateInput(request.prompt)
+                : request.prompt;
             
             // 2. Language Model auswählen
             const model = await this.selectModel();
@@ -57,6 +68,9 @@ export class LanguageModelBridge {
             
             // 4. Request an LLM senden
             stream.progress('Anfrage wird verarbeitet...');
+            const statusDisposable = showStatus
+                ? vscode.window.setStatusBarMessage('$(sync~spin) Anfrage an LLM…')
+                : undefined;
             const chatResponse = await model.sendRequest(messages, {}, token);
             
             // 5. Response sammeln
@@ -68,14 +82,33 @@ export class LanguageModelBridge {
                 // Hier erst mal ganzen Text sammeln
             }
             
-            // 6. Response EN → DE übersetzen
-            const translatedResponse = await this.translateOutput(fullResponse);
+            // 6. Response ggf. in gewünschte Zielsprache übersetzen
+            const desiredOutputLang = ((): 'DE' | 'EN-US' => {
+                if (outputLangSetting === 'de') {
+                    return 'DE';
+                }
+                if (outputLangSetting === 'en') {
+                    return 'EN-US';
+                }
+                // match-input
+                return detected === 'de' ? 'DE' : 'EN-US';
+            })();
+
+            let finalText: string;
+            if (desiredOutputLang === 'DE') {
+                const translatedResponse = await this.translateOutput(fullResponse);
+                finalText = ResponseCleaner.clean(translatedResponse);
+            } else {
+                // Keine Übersetzung nötig, nur bereinigen
+                finalText = ResponseCleaner.clean(fullResponse);
+            }
             
             // 7. Bereinige Markdown-Artefakte
-            const cleanedResponse = ResponseCleaner.clean(translatedResponse);
+            const cleanedResponse = finalText;
             
             // 8. An Stream ausgeben
             stream.markdown(cleanedResponse);
+            statusDisposable?.dispose();
             
             return {
                 text: cleanedResponse,
@@ -99,37 +132,68 @@ export class LanguageModelBridge {
             const cfg = vscode.workspace.getConfiguration('spec-kit-bridger');
             const bufferSize = cfg.get<number>('streaming.bufferSize', 500);
             const sentenceDelayMs = cfg.get<number>('streaming.sentenceDelayMs', 100);
+            const showStatus = cfg.get<boolean>('chat.showStreamingStatus', true);
+            const inputLangSetting = cfg.get<'auto' | 'de' | 'en'>('chat.inputLanguage', 'auto');
+            const outputLangSetting = cfg.get<'match-input' | 'de' | 'en'>('chat.outputLanguage', 'match-input');
 
-            const translatedPrompt = await this.translateInput(request.prompt);
+            // Spracheingabe bestimmen
+            const detected = inputLangSetting === 'auto' ? this.detectLanguage(request.prompt) : inputLangSetting;
+            const shouldTranslateInput = detected === 'de';
+
+            const translatedPrompt = shouldTranslateInput
+                ? await this.translateInput(request.prompt)
+                : request.prompt;
             const model = await this.selectModel();
             const messages = this.buildMessages(translatedPrompt, request);
             
             stream.progress('Übersetze Antwort...');
+            const statusDisposable = showStatus
+                ? vscode.window.setStatusBarMessage('$(sync~spin) Streaming…')
+                : undefined;
             const chatResponse = await model.sendRequest(messages, {}, token);
             
-            // Nutze StreamingTranslator für progressive Übersetzung
-            const streamingTranslator = new StreamingTranslator(
-                this.translationService,
-                this.cache
-            );
+            // Zielsprache bestimmen
+            const desiredOutputLang = ((): 'DE' | 'EN-US' => {
+                if (outputLangSetting === 'de') {
+                    return 'DE';
+                }
+                if (outputLangSetting === 'en') {
+                    return 'EN-US';
+                }
+                return detected === 'de' ? 'DE' : 'EN-US';
+            })();
+
+            // Nur wenn DE-Ziel: Streaming-Übersetzung benutzen; sonst direkt durchreichen
+            const useStreamingTranslation = desiredOutputLang === 'DE';
+            const streamingTranslator = useStreamingTranslation
+                ? new StreamingTranslator(this.translationService, this.cache)
+                : undefined;
             
             let fullResponse = '';
             
             // Verarbeite jeden Fragment aus dem LLM-Stream
             for await (const fragment of chatResponse.text) {
-                await streamingTranslator.processFragment(
-                    fragment,
-                    { targetLang: 'DE', bufferSize, sentenceDelayMs },
-                    stream
-                );
+                if (useStreamingTranslation && streamingTranslator) {
+                    await streamingTranslator.processFragment(
+                        fragment,
+                        { targetLang: 'DE', bufferSize, sentenceDelayMs },
+                        stream
+                    );
+                } else {
+                    // Keine Übersetzung: direkt weiter streamen
+                    stream.markdown(fragment);
+                }
                 fullResponse += fragment;
             }
             
             // Finalisiere Stream (übersetze Rest-Buffer)
-            await streamingTranslator.finalize(
-                { targetLang: 'DE', bufferSize, sentenceDelayMs },
-                stream
-            );
+            if (useStreamingTranslation && streamingTranslator) {
+                await streamingTranslator.finalize(
+                    { targetLang: 'DE', bufferSize, sentenceDelayMs },
+                    stream
+                );
+            }
+            statusDisposable?.dispose();
             
             return {
                 text: fullResponse,
@@ -185,6 +249,39 @@ export class LanguageModelBridge {
         await this.cache.set(text, 'DE', result.text, result.provider);
 
         return result.text;
+    }
+
+    /**
+     * Sehr leichte Heuristik zur Spracherkennung (DE/EN)
+     */
+    private detectLanguage(text: string): 'de' | 'en' | 'unknown' {
+        const t = text.toLowerCase();
+        // Schnelle Marker für Deutsch
+        const hasGermanChars = /[äöüß]/i.test(text);
+        const deWords = [' der ', ' die ', ' das ', ' und ', ' nicht ', ' ist ', ' mit ', ' für ', ' von ', ' im ', ' ein ', ' eine ', ' zum ', ' zur '];
+        const enWords = [' the ', ' and ', ' not ', ' is ', ' with ', ' for ', ' of ', ' in ', ' on ', ' a ', ' an ', ' to '];
+
+        let deScore = hasGermanChars ? 2 : 0;
+        let enScore = 0;
+
+        for (const w of deWords) {
+            if (t.includes(w)) {
+                deScore++;
+            }
+        }
+        for (const w of enWords) {
+            if (t.includes(w)) {
+                enScore++;
+            }
+        }
+
+        if (deScore >= enScore + 1) {
+            return 'de';
+        }
+        if (enScore >= deScore + 1) {
+            return 'en';
+        }
+        return 'unknown';
     }
 
     /**

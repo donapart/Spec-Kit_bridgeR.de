@@ -2,7 +2,7 @@
   "name": "spec-kit-bridger-de",
   "displayName": "Spec-Kit BridgeR.DE",
   "description": "Deutsche Übersetzungs-Bridge für spec-kit GitHub Copilot Chat",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "publisher": "spec-kit",
   "engines": {
     "vscode": "^1.85.0"
@@ -236,6 +236,31 @@
           "minimum": 0,
           "maximum": 2000,
           "description": "Heuristischer Delay (ms) zwischen satzbasierten Flushes im Streaming."
+        },
+        "spec-kit-bridger.chat.inputLanguage": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "de",
+            "en"
+          ],
+          "default": "auto",
+          "description": "Eingabesprache für Chat: automatisch erkennen (Standard), Deutsch oder Englisch. Bei 'auto' wird die Sprache heuristisch erkannt."
+        },
+        "spec-kit-bridger.chat.outputLanguage": {
+          "type": "string",
+          "enum": [
+            "match-input",
+            "de",
+            "en"
+          ],
+          "default": "match-input",
+          "description": "Zielsprache der Chat-Antwort: Eingabesprache beibehalten (Standard), Deutsch oder Englisch."
+        },
+        "spec-kit-bridger.chat.showStreamingStatus": {
+          "type": "boolean",
+          "default": true,
+          "description": "Zeige während Chat-Streaming eine Statusleiste (Spinner) an."
         },
         "spec-kit-bridger.tts.inputFormat": {
           "type": "string",

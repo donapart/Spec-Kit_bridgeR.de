@@ -223,6 +223,20 @@
           "default": true,
           "description": "Progressive Übersetzung für schnellere Antworten (experimentell)"
         },
+        "spec-kit-bridger.streaming.bufferSize": {
+          "type": "number",
+          "default": 500,
+          "minimum": 100,
+          "maximum": 4000,
+          "description": "Größe des Übersetzungs-Buffers (Zeichen) für Streaming (größer = weniger Updates, kleiner = häufiger)."
+        },
+        "spec-kit-bridger.streaming.sentenceDelayMs": {
+          "type": "number",
+          "default": 100,
+          "minimum": 0,
+          "maximum": 2000,
+          "description": "Heuristischer Delay (ms) zwischen satzbasierten Flushes im Streaming."
+        },
         "spec-kit-bridger.tts.inputFormat": {
           "type": "string",
           "enum": [

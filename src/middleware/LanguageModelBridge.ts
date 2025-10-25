@@ -96,10 +96,15 @@ export class LanguageModelBridge {
         token: vscode.CancellationToken
     ): Promise<LanguageModelResponse> {
         try {
+            const cfg = vscode.workspace.getConfiguration('spec-kit-bridger');
+            const bufferSize = cfg.get<number>('streaming.bufferSize', 500);
+            const sentenceDelayMs = cfg.get<number>('streaming.sentenceDelayMs', 100);
+
             const translatedPrompt = await this.translateInput(request.prompt);
             const model = await this.selectModel();
             const messages = this.buildMessages(translatedPrompt, request);
             
+            stream.progress('Übersetze Antwort...');
             const chatResponse = await model.sendRequest(messages, {}, token);
             
             // Nutze StreamingTranslator für progressive Übersetzung
@@ -114,7 +119,7 @@ export class LanguageModelBridge {
             for await (const fragment of chatResponse.text) {
                 await streamingTranslator.processFragment(
                     fragment,
-                    { targetLang: 'DE' },
+                    { targetLang: 'DE', bufferSize, sentenceDelayMs },
                     stream
                 );
                 fullResponse += fragment;
@@ -122,7 +127,7 @@ export class LanguageModelBridge {
             
             // Finalisiere Stream (übersetze Rest-Buffer)
             await streamingTranslator.finalize(
-                { targetLang: 'DE' },
+                { targetLang: 'DE', bufferSize, sentenceDelayMs },
                 stream
             );
             
@@ -212,28 +217,42 @@ export class LanguageModelBridge {
 
         // Context aus vorherigen Turns (falls vorhanden)
         if (request.context) {
-            const previousMessages = request.context.history.filter(
-                (h) => h instanceof vscode.ChatResponseTurn
-            );
-
-            previousMessages.forEach((m) => {
-                let fullMessage = '';
-                m.response.forEach((r) => {
-                    const mdPart = r as vscode.ChatResponseMarkdownPart;
-                    if (mdPart.value) {
-                        fullMessage += mdPart.value.value || mdPart.value;
-                    }
-                });
-                if (fullMessage) {
-                    messages.push(vscode.LanguageModelChatMessage.Assistant(fullMessage));
-                }
-            });
+            messages.push(...this.buildContextMessages(request.context));
         }
 
         // Aktueller User-Prompt
         messages.push(vscode.LanguageModelChatMessage.User(prompt));
 
         return messages;
+    }
+
+    private buildContextMessages(context: vscode.ChatContext): vscode.LanguageModelChatMessage[] {
+        const ctxMessages: vscode.LanguageModelChatMessage[] = [];
+        const previous = context.history.filter((h) => h instanceof vscode.ChatResponseTurn);
+
+        const isMarkdownString = (x: unknown): x is { value: string } => {
+            return !!x && typeof (x as { value?: unknown }).value === 'string';
+        };
+
+        for (const turn of previous) {
+            if (turn instanceof vscode.ChatResponseTurn) {
+                let full = '';
+                for (const part of turn.response) {
+                    const mdPart = part as vscode.ChatResponseMarkdownPart;
+                    const v = mdPart.value as unknown;
+                    if (typeof v === 'string') {
+                        full += v;
+                    } else if (isMarkdownString(v)) {
+                        full += v.value;
+                    }
+                }
+                if (full) {
+                    ctxMessages.push(vscode.LanguageModelChatMessage.Assistant(full));
+                }
+            }
+        }
+
+        return ctxMessages;
     }
 
     /**

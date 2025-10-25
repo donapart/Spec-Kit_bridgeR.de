@@ -88,12 +88,15 @@ export class DocumentationView {
                     html = this.renderEnglish(content);
                     break;
                 case 'german':
+                    this.panel?.webview.postMessage({ command: 'updateContent', html: '<p>Übersetze…</p>' });
                     html = await this.renderGerman(content);
                     break;
                 case 'parallel':
+                    this.panel?.webview.postMessage({ command: 'updateContent', html: '<p>Übersetze…</p>' });
                     html = await this.renderParallel(content);
                     break;
                 case 'tts':
+                    this.panel?.webview.postMessage({ command: 'updateContent', html: '<p>Übersetze…</p>' });
                     html = await this.renderTTS(content);
                     break;
             }
@@ -216,9 +219,9 @@ Spec-Kit is a powerful extension for GitHub Copilot that helps you write better 
             .replace(/\*(.*)\*/gim, '<em>$1</em>')
             .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
             .replace(/`([^`]+)`/g, '<code>$1</code>')
-            .replace(/^- (.*$)/gim, '<li>$1</li>')
-            .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
-            .replace(/\n/g, '<br>');
+            .replaceAll(/^- (.*$)/gim, '<li>$1</li>')
+            .replaceAll(/^\d+\. (.*$)/gim, '<li>$1</li>')
+            .replaceAll('\n', '<br>');
     }
 
     private async getWebviewContent(): Promise<string> {

@@ -28,17 +28,17 @@ export class ChatParticipantHandler {
                 case 'test':
                     return await this.handleTest(userMessage, stream, _token);
                 case 'plan':
-                    return await this.handlePlan(userMessage, stream, _token);
+                    return await this.handlePlan(userMessage, context, stream, _token);
                 case 'implement':
-                    return await this.handleImplement(userMessage, stream, _token);
+                    return await this.handleImplement(userMessage, context, stream, _token);
                 case 'review':
-                    return await this.handleReview(userMessage, stream, _token);
+                    return await this.handleReview(userMessage, context, stream, _token);
                 case 'debug':
-                    return await this.handleDebug(userMessage, stream, _token);
+                    return await this.handleDebug(userMessage, context, stream, _token);
                 case 'docs':
                     return await this.handleDocs(userMessage, stream, _token);
                 default:
-                    return await this.handleGeneral(userMessage, stream, _token);
+                    return await this.handleGeneral(userMessage, context, stream, _token);
             }
         } catch (error) {
             stream.markdown(`❌ **Fehler:** ${error instanceof Error ? error.message : 'Unbekannter Fehler'}`);
@@ -85,6 +85,7 @@ export class ChatParticipantHandler {
 
     private async handlePlan(
         userMessage: string,
+        context: vscode.ChatContext,
         stream: vscode.ChatResponseStream,
         token: vscode.CancellationToken
     ): Promise<vscode.ChatResult> {
@@ -100,7 +101,8 @@ export class ChatParticipantHandler {
                     {
                         prompt: userMessage,
                         command: 'plan',
-                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('plan')
+                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('plan'),
+                        context
                     },
                     stream,
                     token
@@ -110,7 +112,8 @@ export class ChatParticipantHandler {
                     {
                         prompt: userMessage,
                         command: 'plan',
-                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('plan')
+                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('plan'),
+                        context
                     },
                     stream,
                     token
@@ -132,26 +135,45 @@ export class ChatParticipantHandler {
 
     private async handleImplement(
         userMessage: string,
+        context: vscode.ChatContext,
         stream: vscode.ChatResponseStream,
         token: vscode.CancellationToken
     ): Promise<vscode.ChatResult> {
         stream.markdown('⚙️ **Implementierungs-Modus**: Generiere Code...\n\n');
 
         try {
-            await this.languageModelBridge.sendRequest(
-                {
-                    prompt: userMessage,
-                    command: 'implement',
-                    systemPrompt: LanguageModelBridge.getSystemPromptForCommand('implement')
-                },
-                stream,
-                token
-            );
+            const config = vscode.workspace.getConfiguration('spec-kit-bridger');
+            const useStreaming = config.get<boolean>('streamingEnabled', true);
+
+            if (useStreaming) {
+                await this.languageModelBridge.sendRequestStreaming(
+                    {
+                        prompt: userMessage,
+                        command: 'implement',
+                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('implement'),
+                        context
+                    },
+                    stream,
+                    token
+                );
+            } else {
+                await this.languageModelBridge.sendRequest(
+                    {
+                        prompt: userMessage,
+                        command: 'implement',
+                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('implement'),
+                        context
+                    },
+                    stream,
+                    token
+                );
+            }
 
             return { 
                 metadata: { 
                     command: 'implement',
-                    usedLLM: true
+                    usedLLM: true,
+                    streaming: config.get<boolean>('streamingEnabled', true)
                 } 
             };
         } catch (error) {
@@ -162,26 +184,45 @@ export class ChatParticipantHandler {
 
     private async handleReview(
         userMessage: string,
+        context: vscode.ChatContext,
         stream: vscode.ChatResponseStream,
         token: vscode.CancellationToken
     ): Promise<vscode.ChatResult> {
         stream.markdown('🔍 **Review-Modus**: Analysiere Code...\n\n');
 
         try {
-            await this.languageModelBridge.sendRequest(
-                {
-                    prompt: userMessage,
-                    command: 'review',
-                    systemPrompt: LanguageModelBridge.getSystemPromptForCommand('review')
-                },
-                stream,
-                token
-            );
+            const config = vscode.workspace.getConfiguration('spec-kit-bridger');
+            const useStreaming = config.get<boolean>('streamingEnabled', true);
+
+            if (useStreaming) {
+                await this.languageModelBridge.sendRequestStreaming(
+                    {
+                        prompt: userMessage,
+                        command: 'review',
+                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('review'),
+                        context
+                    },
+                    stream,
+                    token
+                );
+            } else {
+                await this.languageModelBridge.sendRequest(
+                    {
+                        prompt: userMessage,
+                        command: 'review',
+                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('review'),
+                        context
+                    },
+                    stream,
+                    token
+                );
+            }
 
             return { 
                 metadata: { 
                     command: 'review',
-                    usedLLM: true
+                    usedLLM: true,
+                    streaming: config.get<boolean>('streamingEnabled', true)
                 } 
             };
         } catch (error) {
@@ -192,26 +233,45 @@ export class ChatParticipantHandler {
 
     private async handleDebug(
         userMessage: string,
+        context: vscode.ChatContext,
         stream: vscode.ChatResponseStream,
         token: vscode.CancellationToken
     ): Promise<vscode.ChatResult> {
         stream.markdown('🐛 **Debug-Modus**: Analysiere Problem...\n\n');
 
         try {
-            await this.languageModelBridge.sendRequest(
-                {
-                    prompt: userMessage,
-                    command: 'debug',
-                    systemPrompt: LanguageModelBridge.getSystemPromptForCommand('debug')
-                },
-                stream,
-                token
-            );
+            const config = vscode.workspace.getConfiguration('spec-kit-bridger');
+            const useStreaming = config.get<boolean>('streamingEnabled', true);
+
+            if (useStreaming) {
+                await this.languageModelBridge.sendRequestStreaming(
+                    {
+                        prompt: userMessage,
+                        command: 'debug',
+                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('debug'),
+                        context
+                    },
+                    stream,
+                    token
+                );
+            } else {
+                await this.languageModelBridge.sendRequest(
+                    {
+                        prompt: userMessage,
+                        command: 'debug',
+                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('debug'),
+                        context
+                    },
+                    stream,
+                    token
+                );
+            }
 
             return { 
                 metadata: { 
                     command: 'debug',
-                    usedLLM: true
+                    usedLLM: true,
+                    streaming: config.get<boolean>('streamingEnabled', true)
                 } 
             };
         } catch (error) {
@@ -241,21 +301,51 @@ export class ChatParticipantHandler {
 
     private async handleGeneral(
         userMessage: string,
+        context: vscode.ChatContext,
         stream: vscode.ChatResponseStream,
-        _token: vscode.CancellationToken
+        token: vscode.CancellationToken
     ): Promise<vscode.ChatResult> {
-        stream.markdown('💬 **Allgemeine Anfrage**: Wird für Copilot übersetzt...\n\n');
+        stream.markdown('💬 **Allgemeine Anfrage**: Verarbeite mit Copilot und Übersetzung...\n\n');
 
-        const translatedPrompt = await this.translateForCopilot(userMessage);
-        
-        stream.markdown(`**Übersetzung:**\n> ${translatedPrompt}\n\n`);
-        stream.markdown('💡 *Diese Übersetzung kann an spec-kit oder GitHub Copilot weitergegeben werden.*\n');
+        try {
+            const config = vscode.workspace.getConfiguration('spec-kit-bridger');
+            const useStreaming = config.get<boolean>('streamingEnabled', true);
 
-        return { 
-            metadata: { 
-                command: 'general'
-            } 
-        };
+            if (useStreaming) {
+                await this.languageModelBridge.sendRequestStreaming(
+                    {
+                        prompt: userMessage,
+                        command: 'general',
+                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('general'),
+                        context
+                    },
+                    stream,
+                    token
+                );
+            } else {
+                await this.languageModelBridge.sendRequest(
+                    {
+                        prompt: userMessage,
+                        command: 'general',
+                        systemPrompt: LanguageModelBridge.getSystemPromptForCommand('general'),
+                        context
+                    },
+                    stream,
+                    token
+                );
+            }
+
+            return { 
+                metadata: { 
+                    command: 'general',
+                    usedLLM: true,
+                    streaming: useStreaming
+                } 
+            };
+        } catch (error) {
+            stream.markdown(`\n\n❌ **Fehler bei allgemeiner Anfrage:** ${error instanceof Error ? error.message : String(error)}\n`);
+            return { errorDetails: { message: String(error) } };
+        }
     }
 
     private async translateForCopilot(text: string): Promise<string> {
